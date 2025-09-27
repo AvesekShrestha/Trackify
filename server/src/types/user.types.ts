@@ -2,7 +2,7 @@ import z from "zod"
 import { Document } from "mongoose"
 
 const ZodUser = z.object({
-    username : z.string().trim().min(1, {message : "Username must be atleast 1 character"}),
+    username : z.string().trim().min(1, {message : "Username must be atleast 1 character"}).optional(),
     email : z.email({message : "Invalid email address"}),
     password : z.string().trim().min(8 , { message : "password mustbe great than 8 characters"})
 })

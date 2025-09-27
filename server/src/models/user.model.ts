@@ -35,14 +35,14 @@ userSchema.methods.comparePassword = async function(candidatePassword : string) 
     return bcrypt.compare(candidatePassword , this.password)
 }
 
-userSchema.methods.generateAccessToken = async function() : Promise<string> {
+userSchema.methods.generateAccessToken = function() : string {
     if(!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env" , 400)
-    return jwt.sign({_id : this._id , username : this.username, email : this.email}, jwtSecret , {expiresIn : "15m"})
+    return jwt.sign({_id : this._id , username : this.username, email : this.email}, jwtSecret , {expiresIn : "1m"})
 }
 
-userSchema.methods.generateRefreshToken = async function() : Promise<string> {
+userSchema.methods.generateRefreshToken = function() : string {
     if(!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env" , 400)
-    return jwt.sign(this._id, jwtSecret , {expiresIn : "15m"})
+    return jwt.sign({_id : this._id}, jwtSecret , {expiresIn : "7d"})
 }
 
 const User = mongoose.model<IUser>("user" , userSchema)

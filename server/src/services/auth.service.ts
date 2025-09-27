@@ -1,7 +1,9 @@
-import { IRegisterPayload, ZodUser } from "../types/user.types";
+import { ILoginPayload, IRegisterPayload, ZodUser } from "../types/user.types";
 import { ZodError } from "zod";
 import ErrorHandler from "../utils/errorHandler";
 import authRepository from "../repositories/auth.repository";
+import jwt from "jsonwebtoken"
+import { jwtSecret } from "../config/constant";
 
 const authService = {
 
@@ -12,8 +14,36 @@ const authService = {
 
         } catch (error: any) {
             if (error instanceof ZodError) throw new ErrorHandler(error.issues[0].message, 400)
-            throw new ErrorHandler(error.message , 400)
+            throw new ErrorHandler(error.message, 400)
         }
+    },
+    async login(payload: ILoginPayload) {
+        try {
+            ZodUser.parse(payload)
+            const user = await authRepository.login(payload)
+
+            const accessToken = user.generateAccessToken()
+            const refreshToken = user.generateRefreshToken()
+
+            return {accessToken, refreshToken}
+
+        } catch (error: any) {
+            if (error instanceof ZodError) throw new ErrorHandler(error.issues[0].message, 400)
+            throw new ErrorHandler(error.message, 400)
+        }
+    },
+    async refresh(refreshToken : string){
+        
+        if(!refreshToken) throw new ErrorHandler("Refresh Token requied", 401)
+        if(!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env file", 400)
+        
+        const payload = jwt.verify(refreshToken, jwtSecret) as {_id : string}
+
+        const user = await authRepository.refresh(payload._id)
+
+        const accessToken = user.generateAccessToken()
+        
+        return accessToken
     }
 }
 
