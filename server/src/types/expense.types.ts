@@ -1,14 +1,14 @@
 import mongoose from "mongoose"
-import { describe } from "node:test"
-import z, { date } from "zod"
+import z from "zod"
 
 const ZodExpense = z.object({
 
     amount : z.number().positive("Amount should be postive number"),
     category : z.enum(["Food" , "Transport", "Entertainment", "Health" , "Shopping", "Bills" , "Others"]),
-    description : z.string().trim(),
-    date : z.date(),
+    description : z.string().trim().optional(),
 })
+
+const ZodExpenseUpdate = ZodExpense.partial().refine((data)=> Object.keys(data).length > 0 , "At least on field should be passed")
 
 enum ExpenseCategory {
     FOOD = "Food",
@@ -28,6 +28,12 @@ interface IExpense {
     userId : mongoose.Schema.Types.ObjectId
 }
 
+interface IExpensePayload{
+    amount : number
+    category : ExpenseCategory
+    description : string
+}
+
 interface ExpensePayload { 
     amount : number
     category : ExpenseCategory
@@ -37,4 +43,4 @@ interface ExpensePayload {
 
 
 
-export {ExpenseCategory , IExpense , ExpensePayload , ZodExpense}
+export {ExpenseCategory , IExpense , ExpensePayload , ZodExpense, ZodExpenseUpdate, IExpensePayload}

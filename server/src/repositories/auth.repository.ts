@@ -1,8 +1,6 @@
 import { IRegisterPayload, ILoginPayload, IUser } from "../types/user.types"
 import User from "../models/user.model"
 import ErrorHandler from "../utils/errorHandler"
-import { jwtSecret } from "../config/constant"
-import jwt from "jsonwebtoken"
 
 const authRepository = {
 

@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { IUser } from "../types/user.types";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
-import { jwtSecret } from "../config/constant";
+import { secret } from "../config/constant";
 import ErrorHandler from "../utils/errorHandler";
 
 const userSchema = new mongoose.Schema<IUser>({
@@ -36,13 +36,13 @@ userSchema.methods.comparePassword = async function(candidatePassword : string) 
 }
 
 userSchema.methods.generateAccessToken = function() : string {
-    if(!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env" , 400)
-    return jwt.sign({_id : this._id , username : this.username, email : this.email}, jwtSecret , {expiresIn : "1m"})
+    if(!secret) throw new ErrorHandler("JWT secret is not present in .env" , 400)
+    return jwt.sign({_id : this._id , username : this.username, email : this.email}, secret , {expiresIn : "1d"})
 }
 
 userSchema.methods.generateRefreshToken = function() : string {
-    if(!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env" , 400)
-    return jwt.sign({_id : this._id}, jwtSecret , {expiresIn : "7d"})
+    if(!secret) throw new ErrorHandler("JWT secret is not present in .env" , 400)
+    return jwt.sign({_id : this._id}, secret , {expiresIn : "7d"})
 }
 
 const User = mongoose.model<IUser>("user" , userSchema)

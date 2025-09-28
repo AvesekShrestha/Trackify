@@ -3,7 +3,7 @@ import { ZodError } from "zod";
 import ErrorHandler from "../utils/errorHandler";
 import authRepository from "../repositories/auth.repository";
 import jwt from "jsonwebtoken"
-import { jwtSecret } from "../config/constant";
+import { secret } from "../config/constant";
 
 const authService = {
 
@@ -35,9 +35,9 @@ const authService = {
     async refresh(refreshToken : string){
         
         if(!refreshToken) throw new ErrorHandler("Refresh Token requied", 401)
-        if(!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env file", 400)
+        if(!secret) throw new ErrorHandler("JWT secret is not present in .env file", 400)
         
-        const payload = jwt.verify(refreshToken, jwtSecret) as {_id : string}
+        const payload = jwt.verify(refreshToken, secret) as {_id : string}
 
         const user = await authRepository.refresh(payload._id)
 
