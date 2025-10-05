@@ -1,7 +1,8 @@
 import { NextFunction, Request, Response } from "express";
 import ErrorHandler from "../utils/errorHandler";
-import jwt from "jsonwebtoken";
+import jwt, { TokenExpiredError } from "jsonwebtoken";
 import { secret } from "../config/constant";
+import { resourceUsage } from "process";
 
 declare global {
   namespace Express {
@@ -37,6 +38,7 @@ const authenticate = (req: Request, res: Response, next: NextFunction) => {
 
     next();
   } catch (err) {
+    if(err instanceof TokenExpiredError) return next(new ErrorHandler("Access Token Expired" , 401))
     return next(new ErrorHandler("Invalid token", 401));
   }
 };
