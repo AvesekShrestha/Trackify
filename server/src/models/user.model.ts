@@ -1,9 +1,16 @@
 import mongoose from "mongoose";
-import { IUser } from "../types/user.types";
+import { IUser , IGmail } from "../types/user.types";
 import bcrypt from "bcrypt"
 import jwt from "jsonwebtoken"
 import { secret } from "../config/constant";
 import ErrorHandler from "../utils/errorHandler";
+
+const gmailSchema = new mongoose.Schema<IGmail>({
+    connectedEmail : String,
+    accessToken : String,
+    refreshToken : String,
+    historyId : String 
+},{_id : false})
 
 const userSchema = new mongoose.Schema<IUser>({
     username : {
@@ -20,6 +27,10 @@ const userSchema = new mongoose.Schema<IUser>({
         type : String,
         required : true
     },
+    gmail : {
+        type : gmailSchema,
+        default : null
+    }
 })
 
 userSchema.pre("save" , async function(next){

@@ -3,7 +3,8 @@ import authRouter from "./auth"
 import incomeRouter from "./income"
 import expenseRouter from "./expense"
 import authenticate from "../../middleware/auth.middleware"; 
-
+import oauthRouter from "./oauth"
+import gmailRouter from "./gmail"
 
 const router = Router()
 
@@ -13,5 +14,7 @@ router.use(authenticate)
 
 router.use("/income", incomeRouter)
 router.use("/expense", expenseRouter)
+router.use("/oauth" , oauthRouter)
+router.use("/gmail" , gmailRouter)
 
 export default router

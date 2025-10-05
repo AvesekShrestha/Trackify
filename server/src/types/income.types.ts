@@ -28,7 +28,9 @@ interface IIncome{
 interface IIncomePayload{
   source : IncomeSource
   amount : number
-  description : string
+  description? : string
+  date? : Date
+  
 }
 
 export {IIncome, IncomeSource , ZodIncome, IIncomePayload, ZodIncomeUpdate}

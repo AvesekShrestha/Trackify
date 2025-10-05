@@ -7,10 +7,18 @@ const ZodUser = z.object({
     password : z.string().trim().min(8 , { message : "password mustbe great than 8 characters"})
 })
 
+interface IGmail{
+    connectedEmail : string 
+    accessToken : string
+    refreshToken : string
+    historyId? : string 
+}
+
 interface IUser extends Document{
     username : string
     email : string
     password : string 
+    gmail : IGmail
     comparePassword(candidatePassword : string) : Promise<boolean>
     generateAccessToken() : string
     generateRefreshToken() : string
@@ -27,4 +35,4 @@ interface ILoginPayload {
     password : string
 }
 
-export {IUser , IRegisterPayload , ILoginPayload , ZodUser}
+export {IUser , IRegisterPayload , ILoginPayload , ZodUser , IGmail}

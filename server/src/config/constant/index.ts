@@ -11,5 +11,6 @@ if (!jwtSecret) throw new ErrorHandler("JWT secret is not present in .env", 400)
 
 const secret = jwtSecret.toString()
 
+const geminiKey = process.env.GEMINI_API_KEY!
 
-export { port, secret}
+export { port, secret , geminiKey}

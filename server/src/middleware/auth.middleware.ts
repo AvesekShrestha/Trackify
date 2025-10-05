@@ -1,33 +1,44 @@
-import { NextFunction, Request , Response } from "express";
-import { IUser } from "../types/user.types";
+import { NextFunction, Request, Response } from "express";
 import ErrorHandler from "../utils/errorHandler";
-import jwt from "jsonwebtoken"
+import jwt from "jsonwebtoken";
 import { secret } from "../config/constant";
 
 declare global {
-    namespace Express {
-        interface Request{
-            user : IJwtPayload
-        }
+  namespace Express {
+    interface Request {
+      user: IJwtPayload;
     }
+  }
 }
 
-interface IJwtPayload{
-    _id : string,
-    username : string,
-    email : string
+interface IJwtPayload {
+  _id: string;
+  username: string;
+  email: string;
 }
 
+const PUBLIC_PATHS = [
+  "/auth/register",
+  "/auth/login",
+  "/auth/forgot-password",
+  "/gmail/callback",
+];
 
-const authenticate = async(req : Request , res : Response , next : NextFunction) =>{
+const authenticate = (req: Request, res: Response, next: NextFunction) => {
 
-    const token = req.cookies.accessToken
-    if(!token) next(new ErrorHandler("Access token required" , 401))
-    
-    const paylaod = jwt.verify(token , secret) as IJwtPayload
-    req.user = paylaod
+  if (PUBLIC_PATHS.includes(req.path)) return next();
 
-    next()
-}
+  try {
+    const token = req.cookies?.accessToken;
+    if (!token) return next(new ErrorHandler("Access token required", 401));
 
-export default authenticate
+    const payload = jwt.verify(token, secret) as IJwtPayload;
+    req.user = payload;
+
+    next();
+  } catch (err) {
+    return next(new ErrorHandler("Invalid token", 401));
+  }
+};
+
+export default authenticate;

@@ -31,7 +31,8 @@ interface IExpense {
 interface IExpensePayload{
     amount : number
     category : ExpenseCategory
-    description : string
+    description? : string
+    date? : Date
 }
 
 interface ExpensePayload { 
