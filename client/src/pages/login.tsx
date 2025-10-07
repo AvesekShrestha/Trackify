@@ -1,99 +1,164 @@
 "use client";
 
-import React, { useState } from "react";
-import api from "@/utils/axios";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useNavigate } from "react-router-dom";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
+import LoginImage from "../assets/login.jpg";
+import { Link, useNavigate } from "react-router-dom";
+import api from "@/utils/axios";
+import { useMutation } from "@tanstack/react-query";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import { IUser, loginSchema } from "@/types/login.type";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
-  const [loading, setLoading] = useState(false);
+const Login = () => {
+    const [show, setShow] = useState(false);
+    const navigate = useNavigate();
 
-  const navigate = useNavigate()
+    const loginMutation = useMutation({
+        mutationFn: async (data : IUser ) => {
+            const res = await api.post("/auth/login", data);
+            return res.data;
+        },
+        onSuccess: (data : any) => {
+            console.log(data)
+            navigate("/dashboard");
+        },
+        onError: (error: any) => {
+            console.error("Login failed:", error.response?.data || error.message);
+            alert(error.response?.data?.message || "Login failed. Please try again.");
+        },
+    });
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
+    const {
+        handleSubmit,
+        control,
+        formState: { errors },
+    } = useForm<IUser>({
+        defaultValues: {
+            email: "",
+            password: "",
+        },
+        resolver: zodResolver(loginSchema),
+    });
 
-    if (!email || !password) {
-      setError("All fields are required.");
-      return;
-    }
+    const onSubmit: SubmitHandler<IUser> = (data) => {
+        loginMutation.mutate(data);
+    };
 
-    try {
-      setLoading(true);
-      const response = await api.post("/auth/login", {
-        email,
-        password,
-      });
+    return (
+        <div className="flex min-h-screen items-center justify-center bg-white">
+            <div className="flex w-full max-w-5xl overflow-hidden rounded-2xl shadow-lg border bg-white">
+                {/* Left Side - Image */}
+                <div className="hidden md:flex w-1/2 relative">
+                    <img
+                        src={LoginImage}
+                        alt="Login Illustration"
+                        className="absolute inset-0 w-full h-full object-cover object-top scale-50"
+                    />
+                </div>
 
-      if (response.status === 201) {
-        setSuccess(true);
-        setEmail("");
-        setPassword("");
-        navigate("/oauth")
-      }
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Registration failed.");
-    } finally {
-      setLoading(false);
-    }
-  };
+                {/* Right Side - Form */}
+                <div className="w-full md:w-1/2 flex items-center justify-center p-8 bg-white">
+                    <Card className="w-full max-w-sm border-none shadow-none">
+                        <CardHeader className="text-center space-y-1">
+                            <CardTitle className="text-3xl font-semibold text-gray-800">
+                                Login
+                            </CardTitle>
+                            <p className="text-sm text-gray-500">Welcome back!</p>
+                        </CardHeader>
 
-  return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <Card className="w-full max-w-md">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Register</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {error && (
-            <Alert variant="destructive" className="mb-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-          {success && (
-            <Alert variant="default" className="mb-4">
-              <AlertDescription>Registration successful!</AlertDescription>
-            </Alert>
-          )}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Enter your email"
-              />
+                        <CardContent>
+                            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)}>
+                                {/* Email */}
+                                <div className="space-y-2">
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                        <Controller
+                                            name="email"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Input
+                                                    id="email"
+                                                    type="email"
+                                                    placeholder="john@gmail.com"
+                                                    className="pl-10"
+                                                    {...field}
+                                                />
+                                            )}
+                                        />
+                                    </div>
+                                    {errors.email && (
+                                        <p className="text-red-500 text-sm">
+                                            {errors.email.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Password */}
+                                <div className="space-y-2">
+                                    <div className="relative">
+                                        <Lock className="absolute left-3 top-3 h-5 w-5 text-gray-400" />
+                                        <Controller
+                                            name="password"
+                                            control={control}
+                                            render={({ field }) => (
+                                                <Input
+                                                    type={show ? "text" : "password"}
+                                                    className="pl-10 pr-10"
+                                                    placeholder="********"
+                                                    {...field}
+                                                />
+                                            )}
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => setShow(!show)}
+                                            className="absolute right-3 top-2.5 text-gray-400 hover:text-gray-600"
+                                        >
+                                            {show ? (
+                                                <EyeOff className="h-5 w-5" />
+                                            ) : (
+                                                <Eye className="h-5 w-5" />
+                                            )}
+                                        </button>
+                                    </div>
+                                    {errors.password && (
+                                        <p className="text-red-500 text-sm">
+                                            {errors.password.message}
+                                        </p>
+                                    )}
+                                </div>
+
+                                {/* Login Button */}
+                                <Button
+                                    type="submit"
+                                    className="w-full bg-blue-600 hover:bg-blue-700 text-white"
+                                    disabled={loginMutation.isLoading}
+                                >
+                                    {loginMutation.isPending ? "Logging in..." : "Login"}
+                                </Button>
+
+                                {/* Footer */}
+                                <p className="text-center text-sm text-gray-500 mt-3">
+                                    Don’t have an account?{" "}
+                                    <Link
+                                        to="/register"
+                                        className="text-blue-600 hover:underline font-medium"
+                                    >
+                                        Register
+                                    </Link>
+                                </p>
+                            </form>
+                        </CardContent>
+                    </Card>
+                </div>
             </div>
-            <div>
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter your password"
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Login..." : "Login"}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
-  );
+        </div>
+    );
 };
 
-export default Login
+export default Login;
+

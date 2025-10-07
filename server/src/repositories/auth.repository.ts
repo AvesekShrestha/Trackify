@@ -1,4 +1,4 @@
-import { IRegisterPayload, ILoginPayload, IUser } from "../types/user.types"
+import { IRegisterPayload, ILoginPayload } from "../types/user.types"
 import User from "../models/user.model"
 import ErrorHandler from "../utils/errorHandler"
 
@@ -27,7 +27,7 @@ const authRepository = {
     async refresh(_id : string){
         
         const user = await User.findById(_id)
-        if(!user) throw new ErrorHandler("Invalid refresh token" , 401)
+        if(!user) throw new ErrorHandler("Invalid refresh token" , 400)
             
         return user
 

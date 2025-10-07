@@ -4,8 +4,7 @@ interface IIncome{
     source? : string
     category? : string
     type : string
-    date : string 
-
+    xlabel : string 
 }
 
 export {IIncome}
