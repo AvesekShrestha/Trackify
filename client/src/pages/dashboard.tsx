@@ -48,33 +48,71 @@ export default function Dashboard() {
             return response.data.data;
         },
     });
+    const {
+        isLoading: isBalanceLoading,
+        isError: isBalanceError,
+        error: balanceError,
+        data: balance,
+    } = useQuery({
+        queryKey: ["balance"],
+        queryFn: async () => {
+            const response = await api.get("/report/balance");
+            return response.data.data;
+        },
+    });
+    const {
+        isLoading: isMonthlyIncomeLoading,
+        isError: isMonthlyIncomeError,
+        error: monthlyIncomeError,
+        data: monthlyIncome,
+    } = useQuery({
+        queryKey: ["monthlyIncome"],
+        queryFn: async () => {
+            const response = await api.get("/report/monthlyIncome");
+            return response.data.data;
+        },
+    });
 
-    if (isRecentLoading || isIncomeLoading || isExpenseLoading) return <div>Loading...</div>;
+    const {
+        isLoading: isMonthlyExpenseLoading,
+        isError: isMonthlyExpenseError,
+        error: monthlyExpenseError,
+        data: monthlyExpense,
+    } = useQuery({
+        queryKey: ["monthlyExpense"],
+        queryFn: async () => {
+            const response = await api.get("/report/monthlyExpense");
+            return response.data.data;
+        },
+    });
+
+    if (isRecentLoading || isIncomeLoading || isExpenseLoading || isBalanceError || isMonthlyExpenseError || isMonthlyIncomeError) return <div>Loading...</div>;
     if (isRecentError) return <div>Error: {recentError.message}</div>;
     if (isIncomeError) return <div>Error: {incomeError.message}</div>;
     if (isExpenseError) return <div>Error: {expenseError.message}</div>;
+    if (isBalanceError) return <div>Error: {balanceError.message}</div>;
+    if (isMonthlyExpenseError) return <div>Error: {monthlyIncomeError.message}</div>;
+    if (isMonthlyExpenseError) return <div>Error: {monthlyExpenseError.message}</div>;
 
-    const barGraphData = [
-        { date: "2025-10-01", amount: 500 },
-        { date: "2025-10-02", amount: 750 },
-        { date: "2025-10-03", amount: 300 },
-        { date: "2025-10-04", amount: 1200 },
-    ];
+    function formatKey(str: string): string {
+        const words = str.split(/(?=[A-Z])/);
+        words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
+        return words.join(" ");
+    }
 
     return (
         <div className="flex flex-col gap-6">
 
-            {/* Balance Cards */}
             <div className="flex flex-col md:flex-row justify-between gap-4">
-                <BalanceCard amount={20000} title="Total Balance">
-                    <Wallet />
-                </BalanceCard>
-                <BalanceCard amount={income?.total ?? 10000} title="Total Income">
-                    <CreditCard />
-                </BalanceCard>
-                <BalanceCard amount={1000} title="Total Expense">
-                    <ShoppingCart />
-                </BalanceCard>
+                {
+                    balance.map((b: any) => {
+                        return (
+                            <BalanceCard amount={b.amount} title={formatKey(b._id!)} key={b._id!}>
+                                <Wallet />
+                            </BalanceCard>
+                        )
+                    })
+                }
             </div>
 
             <div className="flex flex-col lg:flex-row gap-6">
@@ -91,11 +129,7 @@ export default function Dashboard() {
                 <div className="w-full lg:w-1/2">
                     <DonutPieChart
                         title="Financial Overview"
-                        data={[
-                            { name: "Total Balance", value: 7000 },
-                            { name: "Total Income", value: 10000 },
-                            { name: "Total Expense", value: 3000 },
-                        ]}
+                        data={balance}
                     />
                 </div>
             </div>
@@ -103,7 +137,7 @@ export default function Dashboard() {
             {/* Income Section */}
             <div className="flex flex-col lg:flex-row gap-6">
                 <div className="w-full lg:w-1/2">
-                    <ScrollableBarChart data={barGraphData} title="Monthly Income" />
+                    <ScrollableBarChart data={monthlyIncome} title="Monthly Income" />
                 </div>
                 <div className="w-full lg:w-1/2">
                     <TransactionList data={income} title="Income">
@@ -133,12 +167,7 @@ export default function Dashboard() {
                 </div>
                 <div className="w-full lg:w-1/2">
                     <DonutPieChart
-                        data={[
-                            { name: "Health", value: 5000 },
-                            { name: "Education", value: 2000 },
-                            { name: "Rent", value: 3000 },
-                            { name: "Entertainment", value: 3000 },
-                        ]}
+                        data={monthlyExpense}
                         title="Monthly Expense"
                     />
                 </div>

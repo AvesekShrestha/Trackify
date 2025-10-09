@@ -63,6 +63,9 @@ export default function AddDialog({ type, text, title }: DialogProp) {
         onSuccess() {
             client.invalidateQueries({ queryKey: [type.toLowerCase()] });
             client.invalidateQueries({ queryKey: ["recent"] });
+            client.invalidateQueries({ queryKey: ["balance"] });
+            client.invalidateQueries({ queryKey: ["monthlyIncome"] });
+            client.invalidateQueries({ queryKey: ["monthlyExpense"] });
             toast("Successfully Added")
 
         },

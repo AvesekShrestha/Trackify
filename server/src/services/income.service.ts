@@ -23,8 +23,11 @@ const incomeService = {
 
         return incomeRepository.getById(incomeId)
     },
-    getAll() {
-        return incomeRepository.getAll()
+    getAll(page: number, limit : number) {
+        
+        if(page <= 0) page = 1
+        if(limit <= 0) limit = 8
+        return incomeRepository.getAll(page , limit)
     },
     update(payload: Partial<IIncomePayload>, incomeId: string) {
 

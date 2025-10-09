@@ -23,8 +23,9 @@ const expenseService = {
 
         return expenseRepository.getById(expenseId)
     },
-    getAll() {
-        return expenseRepository.getAll()
+    getAll(page: number , limit : number) {
+
+        return expenseRepository.getAll(page , limit)
     },
     update(payload: Partial<IExpensePayload>, expenseId: string) {
 

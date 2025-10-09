@@ -13,31 +13,62 @@ const incomeRepository = {
 
         await income.save()
 
-        return income
+        return {success : true ,message : "Income created successfully" ,  data : income} 
     },
     async getById(incomeId: string) {
 
         const income = await Income.findById(incomeId)
         if (!income) throw new ErrorHandler("No such income", 400)
 
-        return income
+        return {success : true,message : "Income fetched" , data : income} 
     },
-    async getAll() {
+    async getAll(page: number, limit: number) {
 
-        const incomes = await Income.aggregate([{$project : {source : 1 , amount : 1 , date : 1 , type : "income"}}])
-        if (!incomes || incomes.length == 0) throw new ErrorHandler("No Income exists", 400)
+        const skip = (page - 1) * limit
 
-        return incomes
+        const incomes = await Income.aggregate([
+            {
+                $project: {
+                    source: 1,
+                    amount: 1,
+                    date: 1,
+                    type: { $literal: "income" }
+                }
+            },
+            { $sort: { date: -1 } },
+            { $skip: skip },
+            { $limit: limit }
+        ]);
+
+        if (!incomes) throw new ErrorHandler("No Income exists", 400)
+
+        const totalRecords = await Income.countDocuments()
+        const totalPages = Math.ceil(totalRecords / limit)
+
+        return {
+            success: true,
+            message: "Income fetched successfully",
+            data: incomes,
+            pagination: {
+                currentPage: page,
+                limit,
+                totalRecords,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
+        }
     },
     async update(payload: Partial<IIncomePayload>, incomeId: string) {
 
-        const updatedIncome = await Income.findByIdAndUpdate(incomeId , {$set : payload}, {new : true})
+        const updatedIncome = await Income.findByIdAndUpdate(incomeId, { $set: payload }, { new: true })
         if (!updatedIncome) throw new ErrorHandler("Error while updating", 500)
 
-        return updatedIncome
+        return {success : true, message : "Record Updated successfully" ,  data : updatedIncome} 
     },
-    async delete(incomeId : string){
+    async delete(incomeId: string) {
         await Income.findByIdAndDelete(incomeId)
+        return {success : true , message : "Income record deleted successfully"}
     }
 
 }

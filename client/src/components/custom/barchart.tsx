@@ -20,18 +20,24 @@ interface BarChartProps {
 
 export default function ScrollableBarChart({
     data,
-    xKey = "date",
+    xKey,
     yKey = "amount",
     title = "Bar Chart",
 }: BarChartProps) {
+
+    const resolvedXKey = xKey || (data[0]?.date ? "date" : "_id");
+
     const barWidth = 70;
     const chartWidth = Math.max(data.length * barWidth, 500);
     const maxYValue = Math.max(...data.map((d) => d[yKey] ?? 0)) || 100;
 
-    const formatDate = (dateStr: string) => {
-        const date = new Date(dateStr);
-        if (isNaN(date.getTime())) return dateStr;
-        return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+    const formatX = (value: string) => {
+        if (resolvedXKey === "date") {
+            const date = new Date(value);
+            if (isNaN(date.getTime())) return value;
+            return date.toLocaleDateString("en-GB", { day: "numeric", month: "short" });
+        }
+        return value.charAt(0).toUpperCase() + value.slice(1);
     };
 
     return (
@@ -48,11 +54,11 @@ export default function ScrollableBarChart({
                             <BarChart data={data} margin={{ top: 10, right: 20, left: 0, bottom: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
                                 <XAxis
-                                    dataKey={xKey}
+                                    dataKey={resolvedXKey}
                                     tick={{ fontSize: 12 }}
                                     interval={0}
                                     tickMargin={10}
-                                    tickFormatter={formatDate}
+                                    tickFormatter={formatX}
                                 />
                                 <YAxis
                                     tick={{ fontSize: 12 }}
@@ -61,7 +67,7 @@ export default function ScrollableBarChart({
                                     tickLine={false}
                                 />
                                 <Tooltip
-                                    labelFormatter={(label) => formatDate(label)}
+                                    labelFormatter={(label) => formatX(label)}
                                     contentStyle={{
                                         backgroundColor: "#fff",
                                         border: "1px solid #e5e7eb",

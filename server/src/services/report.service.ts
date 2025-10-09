@@ -6,9 +6,17 @@ const reportService = {
         if(!userId) throw new ErrorHandler("UserId required" , 400)
         return reportRepository.recentTransaction(userId)
     },
-    availableBalance(userId : string){
+    balanceReport(userId : string){
         if(!userId) throw new ErrorHandler("UserId required" , 400)
-        return reportRepository.availableBalance(userId)
+        return reportRepository.balanceReport(userId)
+    },
+    monthlyIncomeReport(userId : string){
+        if(!userId) throw new ErrorHandler("UserId required" , 400)
+        return reportRepository.monthlyIncomeReport(userId) 
+    },
+    monthlyExpenseReport(userId : string){
+        if(!userId) throw new ErrorHandler("UserId required" , 400)
+        return reportRepository.monthlyExpenseReport(userId)
     }
 }
 
