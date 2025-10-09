@@ -24,7 +24,7 @@ const expenseRepository = {
     },
     async getAll() {
 
-        const expenses = await Expense.find()
+        const expenses = await Expense.aggregate([{$project : {category : 1 , amount : 1 , date : 1, type: "expense"}}])
         if (!expenses || expenses.length == 0) throw new ErrorHandler("No Expense exists", 400)
 
         return expenses

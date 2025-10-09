@@ -18,8 +18,8 @@ const reportRepository = {
                     ]
                 }
             },
-            { $sort: { created_at: -1 } },
-            { $limit: 5 }
+            { $sort: { date : -1 } },
+            { $limit: 10 }
         ]);
         return data
     },

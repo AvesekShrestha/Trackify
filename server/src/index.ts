@@ -5,10 +5,16 @@ import connectDatabase from "./config/database"
 import errorMiddleware from "./middleware/error.middleware"
 import router from "./routes"
 import cookieParser from "cookie-parser"
+import { createServer } from "http"
+import { initalizeSocket } from "./config/socket" 
+
 
 connectDatabase()
 
 const app = express()
+const server = createServer(app)
+
+initalizeSocket(server)
 
 app.use(express.json())
 app.use(cookieParser())
@@ -24,7 +30,7 @@ app.get("/health",  (req : Request , res : Response)=>{
 })
 
 
-app.listen(port, ()=>{
+server.listen(port, ()=>{
    console.log(`App listining at port : ${port}`) 
 })
 

@@ -6,6 +6,10 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { Link, useLocation } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
+import { useUser } from "@/context/userContext";
+import api from "@/utils/axios";
+import { useNavigate } from "react-router-dom";
 
 type NavItem = {
     id: string;
@@ -21,12 +25,25 @@ const NAV_ITEMS: NavItem[] = [
     { id: "setting", label: "Setting", icon: <Settings size={16} />, href: "/setting" },
 
 ];
-
 export default function Sidebar() {
+
+    const navigate = useNavigate()
+
+    const logoutMutation = useMutation({
+        mutationFn : async()=>{
+            await api.post("/auth/logout")
+        },
+        onSuccess(){
+            navigate("/login")
+            setUser(null)
+        }
+    })
+
     const location = useLocation();
     const [collapsed, setCollapsed] = React.useState(false);
 
-    // Determine active item from current path
+    const {user, setUser} = useUser()
+
     const activePath = location.pathname.split("/")[1] || "dashboard";
 
     return (
@@ -95,11 +112,11 @@ export default function Sidebar() {
                     <div className="flex items-center gap-2">
                         <Avatar>
                             <AvatarImage src="/avatar.jpg" alt="User avatar" />
-                            <AvatarFallback>AV</AvatarFallback>
+                            <AvatarFallback>{user?.username.slice(0 , 2).toUpperCase()}</AvatarFallback>
                         </Avatar>
                         <div className="hidden lg:block" style={{ display: collapsed ? "none" : undefined }}>
-                            <div className="text-sm font-medium">Avesek</div>
-                            <div className="text-xs text-muted-foreground">avesekxthaa@gmail.com</div>
+                            <div className="text-sm font-medium">{user?.username}</div>
+                            <div className="text-xs text-muted-foreground">{user?.email}</div>
                         </div>
                     </div>
 
@@ -107,8 +124,8 @@ export default function Sidebar() {
                         className="hidden lg:flex items-center gap-2"
                         style={{ display: collapsed ? "none" : undefined }}
                     >
-                        <Button variant="ghost" size="sm">
-                            <LogOut size={14} />
+                        <Button variant="ghost" size="sm" onClick={()=> logoutMutation.mutate()} className="cursor-pointer">
+                            <LogOut size={14}/>
                         </Button>
                     </div>
                 </div>
@@ -117,7 +134,7 @@ export default function Sidebar() {
                     className="mt-3 flex items-center justify-center lg:hidden"
                     style={{ display: collapsed ? "flex" : undefined }}
                 >
-                    <Button variant="ghost" size="sm">
+                    <Button variant="ghost" size="sm" onClick={()=> logoutMutation.mutate()} className="cursor-pointer">
                         <LogOut size={14} />
                     </Button>
                 </div>

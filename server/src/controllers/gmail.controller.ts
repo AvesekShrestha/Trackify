@@ -19,7 +19,7 @@ const gmailController = {
             Buffer.from(req.body.message.data, "base64").toString("utf-8")
         );
         await gmailService.handleCallback(data.emailAddress, data.historyId)
-
+        
         return res.status(200).json({ success: true, message: "Mail handled successfully" })
     })
 }

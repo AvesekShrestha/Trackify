@@ -1,10 +1,17 @@
-interface IIncome{
-    _id : string
-    amount : number
-    source? : string
-    category? : string
-    type : string
-    xlabel : string 
+interface IIncome {
+    _id: string
+    amount: number
+    source?: string
+    category?: string
+    type: string
+    ylabel: string
+    date?: string
 }
 
-export {IIncome}
+interface ITransactionRequest {
+    source: string
+    amount: number
+    description?: string
+}
+
+export { IIncome, ITransactionRequest }

@@ -7,6 +7,7 @@ import geminiService from "./gemini.service";
 import incomeService from "./income.service";
 import userService from "./user.service";
 import ErrorHandler from "../utils/errorHandler";
+import { getSocketClient } from "../config/socket";
 
 const gmailService = {
 
@@ -14,7 +15,7 @@ const gmailService = {
         const response = await gmail.users.watch({
             userId: "me",
             requestBody: {
-                labelIds: ["INBOX"],
+                labelIds: ["INBOX", "CATEGORY_PERSONAL"],
                 topicName: "projects/trackify-473603/topics/gmail-push",
             },
         })
@@ -78,36 +79,49 @@ const gmailService = {
             }
         }
     },
-    async handleCallback(connectedEmail: string, historyId: string) {
+    async handleCallback(connectedEmail: string, historyId : string) {
 
         const user = await userService.getByConnectedEmail(connectedEmail)
-        if(!user) throw new ErrorHandler("No user exists this email address" , 400)
+        if (!user) throw new ErrorHandler("No user exists this email address", 400)
         const userId = user._id as string
 
+        if (user.gmail?.historyId && Number(historyId) <= Number(user.gmail.historyId)) {
+            return;
+        }
+
         const message = await this.fetchNewMessage(userId) as string
-        await userService.updateHistoryId(userId , historyId)
+        await userService.updateHistoryId(userId, historyId)
+        
+        if (message === undefined) return
 
         const { category, amount, source_type, description, date } = await geminiService.extractEntity(message)
+
+        console.log(category , amount , source_type , description, date)
+        const io = getSocketClient()
 
         if (category == "neutral") return
         else if (category == "income") {
             const payload: IIncomePayload = {
-                source: source_type.charAt(0).toUpperCase() + source_type.slice(1),
+                source: source_type,
                 amount,
                 description,
                 date: new Date(date)
             }
             await incomeService.create(payload, userId)
+
+            io.emit("income")
         }
         else {
             const payload: IExpensePayload = {
                 amount,
-                category: source_type.charAt(0).toUpperCase() + source_type.slice(1),
+                category: source_type,
                 description,
                 date: new Date(date),
             }
             await expenseService.create(payload, userId)
+            io.emit("expense")
         }
+
     }
 }
 

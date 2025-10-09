@@ -7,6 +7,8 @@ const expenseController = {
     create : asyncHandler(async(req : Request , res : Response , next : NextFunction)=>{
         const payload = req.body
         const userId = req.user._id
+        
+        // console.log(payload)
 
         const expense = await expenseService.create(payload, userId)
         return res.status(201).json({success : true, data : expense})

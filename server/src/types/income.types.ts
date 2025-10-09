@@ -2,7 +2,7 @@ import mongoose from "mongoose"
 import z from "zod"
 
 const ZodIncome = z.object({
-  source : z.enum(["Salary" , "Freelance" , "Investment" , "Business" , "Others"]),
+  source : z.enum(["salary" , "freelance" , "investment" , "business" , "others"]),
   amount :  z.number().positive({message : "Income amount should be positive"}),
   description : z.string().trim().optional(),
 })
@@ -10,11 +10,11 @@ const ZodIncome = z.object({
 const ZodIncomeUpdate = ZodIncome.partial().refine((data)=> Object.keys(data).length > 0 , {message : "At least one filed should be provided"})
 
 enum IncomeSource {
-  SALARY = "Salary",
-  FREELANCE = "Freelance",
-  INVESTMENT = "Investment",
-  BUSINESS = "Business",
-  OTHER = "Other",
+  SALARY = "salary",
+  FREELANCE = "freelance",
+  INVESTMENT = "investment",
+  BUSINESS = "business",
+  OTHER = "other",
 }
 
 interface IIncome{

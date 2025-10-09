@@ -24,7 +24,7 @@ const incomeRepository = {
     },
     async getAll() {
 
-        const incomes = await Income.find()
+        const incomes = await Income.aggregate([{$project : {source : 1 , amount : 1 , date : 1 , type : "income"}}])
         if (!incomes || incomes.length == 0) throw new ErrorHandler("No Income exists", 400)
 
         return incomes
