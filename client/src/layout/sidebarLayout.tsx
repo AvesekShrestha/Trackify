@@ -15,9 +15,15 @@ export default function SidebarLayout() {
         socket.on("income", ()=>{
             console.log("income event triggered")
             client.invalidateQueries({queryKey : ["income"]})
+            client.invalidateQueries({queryKey : ["recent"]})
+            client.invalidateQueries({queryKey : ["balance"]})
+            client.invalidateQueries({queryKey : ["monthlyIncome"]})
         })
         socket.on("expense" , ()=>{
             client.invalidateQueries({queryKey : ["expense"]})
+            client.invalidateQueries({queryKey : ["recent"]})
+            client.invalidateQueries({queryKey : ["balance"]})
+            client.invalidateQueries({queryKey : ["monthlyExpense"]})
         })
 
         return()=>{
