@@ -1,5 +1,5 @@
 import BalanceCard from "@/components/custom/balanceCard";
-import { Wallet, CreditCard, ShoppingCart, ArrowRight } from "lucide-react";
+import { Wallet, ArrowRight } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import api from "@/utils/axios";
 import DonutPieChart from "@/components/custom/piechart";
@@ -7,11 +7,13 @@ import ScrollableBarChart from "@/components/custom/barchart";
 import TransactionList from "@/components/custom/transactionList";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { ReportFormatedData } from "@/types/report.type";
+import { formatReportData } from "@/utils/dataFormater";
 
 export default function Dashboard() {
     const navigate = useNavigate();
 
-    const {
+     const {
         isLoading: isRecentLoading,
         isError: isRecentError,
         error: recentError,
@@ -57,7 +59,7 @@ export default function Dashboard() {
         queryKey: ["balance"],
         queryFn: async () => {
             const response = await api.get("/report/balance");
-            return response.data.data;
+            return formatReportData(response.data.data)
         },
     });
     const {
@@ -69,7 +71,7 @@ export default function Dashboard() {
         queryKey: ["monthlyIncome"],
         queryFn: async () => {
             const response = await api.get("/report/monthlyIncome");
-            return response.data.data;
+            return formatReportData(response.data.data)
         },
     });
 
@@ -82,32 +84,27 @@ export default function Dashboard() {
         queryKey: ["monthlyExpense"],
         queryFn: async () => {
             const response = await api.get("/report/monthlyExpense");
-            return response.data.data;
+            return formatReportData(response.data.data)
         },
     });
 
-    if (isRecentLoading || isIncomeLoading || isExpenseLoading || isBalanceError || isMonthlyExpenseError || isMonthlyIncomeError) return <div>Loading...</div>;
+    if (isRecentLoading || isIncomeLoading || isExpenseLoading || isBalanceLoading || isMonthlyIncomeLoading || isMonthlyExpenseLoading) return <div>Loading...</div>;
     if (isRecentError) return <div>Error: {recentError.message}</div>;
     if (isIncomeError) return <div>Error: {incomeError.message}</div>;
     if (isExpenseError) return <div>Error: {expenseError.message}</div>;
     if (isBalanceError) return <div>Error: {balanceError.message}</div>;
-    if (isMonthlyExpenseError) return <div>Error: {monthlyIncomeError.message}</div>;
     if (isMonthlyExpenseError) return <div>Error: {monthlyExpenseError.message}</div>;
-
-    function formatKey(str: string): string {
-        const words = str.split(/(?=[A-Z])/);
-        words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-        return words.join(" ");
-    }
+    if (isMonthlyIncomeError) return <div>Error: {monthlyIncomeError.message}</div>;
 
     return (
         <div className="flex flex-col gap-6">
 
             <div className="flex flex-col md:flex-row justify-between gap-4">
                 {
-                    balance.map((b: any) => {
+                    balance &&
+                    balance.map((b: ReportFormatedData) => {
                         return (
-                            <BalanceCard amount={b.amount} title={formatKey(b._id!)} key={b._id!}>
+                            <BalanceCard amount={b.value} title={b.name} key={b.name}>
                                 <Wallet />
                             </BalanceCard>
                         )
@@ -117,7 +114,7 @@ export default function Dashboard() {
 
             <div className="flex flex-col lg:flex-row gap-6">
                 <div className="w-full lg:w-1/2">
-                    <TransactionList data={recent} title="Recent Transactions">
+                    <TransactionList data={recent} title="Recent Transactions" limit={4}>
                         <Button
                             className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium px-4 py-2 rounded-xl shadow-sm hover:shadow-md cursor-pointer"
                         >
@@ -129,7 +126,7 @@ export default function Dashboard() {
                 <div className="w-full lg:w-1/2">
                     <DonutPieChart
                         title="Financial Overview"
-                        data={balance}
+                        data={balance!}
                     />
                 </div>
             </div>
@@ -137,10 +134,10 @@ export default function Dashboard() {
             {/* Income Section */}
             <div className="flex flex-col lg:flex-row gap-6">
                 <div className="w-full lg:w-1/2">
-                    <ScrollableBarChart data={monthlyIncome} title="Monthly Income" />
+                    <ScrollableBarChart data={monthlyIncome!} title="Monthly Income" />
                 </div>
                 <div className="w-full lg:w-1/2">
-                    <TransactionList data={income} title="Income">
+                    <TransactionList data={income} title="Income" limit={4}>
                         <Button
                             className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium px-4 py-2 rounded-xl shadow-sm hover:shadow-md cursor-pointer"
                             onClick={() => navigate("/income")}
@@ -155,7 +152,7 @@ export default function Dashboard() {
             {/* Expense Section */}
             <div className="flex flex-col lg:flex-row gap-6">
                 <div className="w-full lg:w-1/2">
-                    <TransactionList data={expense} title="Expense">
+                    <TransactionList data={expense} title="Expense" limit={4}>
                         <Button
                             className="bg-[#8b5cf6] hover:bg-[#7c3aed] text-white font-medium px-4 py-2 rounded-xl shadow-sm hover:shadow-md cursor-pointer"
                             onClick={() => navigate("/expense")}
@@ -167,7 +164,7 @@ export default function Dashboard() {
                 </div>
                 <div className="w-full lg:w-1/2">
                     <DonutPieChart
-                        data={monthlyExpense}
+                        data={monthlyExpense!}
                         title="Monthly Expense"
                     />
                 </div>

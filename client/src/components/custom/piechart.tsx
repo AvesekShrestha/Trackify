@@ -1,17 +1,12 @@
 "use client";
 
-import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-
-interface PieChartData {
-    _id: string;
-    amount: number;
-    color?: string;
-}
+import { ReportFormatedData } from "@/types/report.type";
 
 interface Props {
     title?: string;
-    data: PieChartData[];
+    data: ReportFormatedData[]
 }
 
 const DEFAULT_COLORS = [
@@ -29,18 +24,12 @@ export default function DonutPieChart({
     data,
 }: Props) {
 
-    function formatKey(str: string): string {
-        const words = str.split(/(?=[A-Z])/);
-        words[0] = words[0].charAt(0).toUpperCase() + words[0].slice(1);
-        return words.join(" ");
-    }
-
     const chartData = data.map((item, index) => ({
         ...item,
         color: item.color || DEFAULT_COLORS[index % DEFAULT_COLORS.length],
     }));
 
-    const totalValue = chartData.reduce((sum, item) => sum + item.amount, 0);
+    const totalValue = chartData.reduce((sum, item) => sum + item.value, 0);
 
     return (
         <Card className="shadow-md rounded-2xl bg-white">
@@ -55,7 +44,7 @@ export default function DonutPieChart({
                         <PieChart>
                             <Pie
                                 data={chartData}
-                                dataKey="amount"
+                                dataKey="value"
                                 cx="50%"
                                 cy="50%"
                                 innerRadius="60%"
@@ -68,6 +57,7 @@ export default function DonutPieChart({
                                     <Cell key={index} fill={entry.color} />
                                 ))}
                             </Pie>
+                            <Tooltip />
                         </PieChart>
                     </ResponsiveContainer>
 
@@ -82,17 +72,19 @@ export default function DonutPieChart({
                 {/* Legend */}
                 <div className="flex flex-wrap justify-center gap-4 mt-4">
                     {chartData.map((item) => (
-                        <div key={item._id!} className="flex items-center space-x-2">
+                        <div key={item.name!} className="flex items-center space-x-2">
                             <span
                                 className="w-3 h-3 rounded-full"
                                 style={{ backgroundColor: item.color }}
                             />
-                            <span className="text-gray-700 text-sm">{formatKey(item._id!)}</span>
+                            <span className="text-gray-700 text-sm">{item.name}</span>
                         </div>
                     ))}
                 </div>
             </CardContent>
         </Card>
     );
+
+
 }
 

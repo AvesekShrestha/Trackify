@@ -1,13 +1,5 @@
 "use client";
 
-import {
-  Pagination,
-  PaginationContent,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/ui/pagination"
 import { IIncome } from "@/types/income.types";
 import formatDate from "@/utils/dateFormater";
 import {
@@ -26,13 +18,12 @@ import {
     Receipt
 } from "lucide-react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { ReactNode, useState } from "react";
+import { ReactNode } from "react";
 
 interface TransactionListProps {
     title: string;
     data: IIncome[];
     limit?: number;
-    pages : number 
     children: ReactNode
 }
 
@@ -59,16 +50,10 @@ export default function TransactionList({
     title,
     data,
     limit = 8,
-    pages = 1,
     children
 }: TransactionListProps) {
-    
-    const [page ,setPage] = useState<number>(1)
 
     const visibleData = data?.slice(0, limit) || [];
-    const totalPages = pages || 1;
-
-
     return (
         <Card className={`shadow-md rounded-2xl bg-white h-[100%]`}>
             <CardHeader>
@@ -86,7 +71,7 @@ export default function TransactionList({
                 {visibleData.length === 0 ? (
                     <p className="text-gray-500 text-sm">No records found.</p>
                 ) : (
-                    <div className="grid grid-cols-1 xl:grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 gap-2">
                         {visibleData.map((element: IIncome) => {
                             const isIncome = element.type.toLowerCase() === "income";
                             const Icon = isIncome
@@ -100,7 +85,7 @@ export default function TransactionList({
                             return (
                                 <div
                                     key={element._id}
-                                    className="flex justify-between items-center p-3 hover:bg-gray-100 rounded-lg transition-all"
+                                    className="flex justify-between p-3 hover:bg-gray-100 rounded-lg transition-all flex-col gap-2 sm:flex-row"
                                 >
                                     <div className="flex items-center gap-3">
                                         <div
@@ -138,43 +123,6 @@ export default function TransactionList({
                                 </div>
                             );
                         })}
-                    </div>
-                )}
-
-                {totalPages > 1 && (
-                    <div className="mt-6 flex justify-center">
-                        <Pagination>
-                            <PaginationContent>
-                                <PaginationItem>
-                                    <PaginationPrevious
-                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                        className={page === 1 ? "opacity-50 cursor-not-allowed" : ""}
-                                    />
-                                </PaginationItem>
-
-                                {Array.from({ length: totalPages }).map((_, i) => (
-                                    <PaginationItem key={i}>
-                                        <PaginationLink
-                                            onClick={() => setPage(i + 1)}
-                                            isActive={page === i + 1}
-                                        >
-                                            {i + 1}
-                                        </PaginationLink>
-                                    </PaginationItem>
-                                ))}
-
-                                <PaginationItem>
-                                    <PaginationNext
-                                        onClick={() =>
-                                            setPage((p) => Math.min(totalPages, p + 1))
-                                        }
-                                        className={
-                                            page === totalPages ? "opacity-50 cursor-not-allowed" : ""
-                                        }
-                                    />
-                                </PaginationItem>
-                            </PaginationContent>
-                        </Pagination>
                     </div>
                 )}
 

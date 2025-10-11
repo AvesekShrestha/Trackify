@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { databaseUri } from "../constant";
 
 const connectDatabase = async()=>{
     try{
@@ -12,7 +13,7 @@ const connectDatabase = async()=>{
             console.log("Database connected!!")
         })
 
-        await mongoose.connect("mongodb://localhost:27017/trackify")
+        await mongoose.connect(`${databaseUri}`)
 
     }catch(error : any){
         console.error(error)
@@ -22,3 +23,4 @@ const connectDatabase = async()=>{
 
 
 export default connectDatabase
+

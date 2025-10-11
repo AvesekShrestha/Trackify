@@ -1,0 +1,51 @@
+version: "3.9"
+
+services: 
+  db:
+    image: mongo:latest
+    container_name: trackify-db
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    networks:
+      - trackify
+
+  server:
+    build: ./server
+    container_name: trackify-server
+    ports:
+      - "${PORT}:${PORT}"
+    environment:
+      PORT: "${PORT}"
+      JWT_SECRET: "${JWT_SECRET}"
+      CLIENT_ID: "${CLIENT_ID}"
+      CLIENT_SECRET: "${CLIENT_SECRET}"
+      REDIRECT_URI: "${REDIRECT_URI}"
+      TOPIC_NAME: "${TOPIC_NAME}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY}"
+      DATABASE_URI: "${DATABASE_URI}"
+    depends_on:
+      - db
+    restart: on-failure
+    networks:
+      - trackify
+
+  client:
+    build: ./client
+    container_name: trackify-client
+    ports:
+      - "5173:5173"
+    depends_on:
+      - server
+    networks:
+      - trackify
+
+networks:
+  trackify:
+    driver: bridge
+    name: trackify
+
+volumes:
+  mongo-data:
+
